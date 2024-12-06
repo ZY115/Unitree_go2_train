@@ -363,7 +363,7 @@ class RobotDataManager(Node):
         for i in range(self.num_envs):
             # The following code will link the camera's render product and publish the data to the specified topic name.
             render_product = self.cameras[i]._render_product_path
-            step_size = 2
+            step_size = 1
             if (self.num_envs == 1):
                 topic_name = "unitree_go2/front_cam/color_image"
                 frame_id = "unitree_go2/front_cam"                         
@@ -394,7 +394,7 @@ class RobotDataManager(Node):
         for i in range(self.num_envs):
             # The following code will link the camera's render product and publish the data to the specified topic name.
             render_product = self.cameras[i]._render_product_path
-            step_size = 2
+            step_size = 1
             if (self.num_envs == 1):
                 topic_name = "unitree_go2/front_cam/depth_image"                
                 frame_id = "unitree_go2/front_cam"          
@@ -427,7 +427,7 @@ class RobotDataManager(Node):
         for i in range(self.num_envs):
             # The following code will link the camera's render product and publish the data to the specified topic name.
             render_product = self.cameras[i]._render_product_path
-            step_size = 2
+            step_size = 1
             if (self.num_envs == 1):
                 topic_name = "unitree_go2/front_cam/depth_cloud"    
                 frame_id = "unitree_go2/front_cam"          
@@ -463,8 +463,7 @@ class RobotDataManager(Node):
         for i in range(self.num_envs):
             # The following code will link the camera's render product and publish the data to the specified topic name.
             render_product = self.cameras[i]._render_product_path
-            freq = 30
-            step_size = int(60/freq)
+            step_size = 1
             if (self.num_envs == 1):
                 topic_name = "unitree_go2/front_cam/info"
             else:
