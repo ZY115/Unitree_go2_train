@@ -89,7 +89,8 @@ def run_simulator(cfg):
     
     dm.destroy_node()
     rclpy.shutdown()
+    simulation_app.close()
 
 if __name__ == "__main__":
     run_simulator()
-    simulation_app.close()
+    
