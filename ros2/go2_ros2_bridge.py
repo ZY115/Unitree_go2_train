@@ -2,10 +2,13 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped, Twist, TransformStamped
-from sensor_msgs.msg import PointCloud2, PointField
+from sensor_msgs.msg import PointCloud2, PointField, Image
 from sensor_msgs_py import point_cloud2
 from tf2_ros import TransformBroadcaster
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
+import numpy as np
+from cv_bridge import CvBridge
+import cv2
 import omni
 import omni.graph.core as og
 import omni.replicator.core as rep
@@ -40,11 +43,13 @@ class RobotDataManager(Node):
         self.odom_pub = []
         self.pose_pub = []
         self.lidar_pub = []
+        self.semantic_seg_img_vis_pub = []
 
         # ROS2 Subscriber
         self.cmd_vel_sub = []
         self.color_img_sub = []
         self.depth_img_sub = []
+        self.semantic_seg_img_sub = []
 
         # ROS2 Timer
         self.lidar_publish_timer = []
@@ -55,11 +60,18 @@ class RobotDataManager(Node):
                 self.pose_pub.append(
                     self.create_publisher(PoseStamped, "unitree_go2/pose", 10))
                 self.lidar_pub.append(
-                    self.create_publisher(PointCloud2, "unitree_go2/lidar/point_cloud", 1)
+                    self.create_publisher(PointCloud2, "unitree_go2/lidar/point_cloud", 10)
+                )
+                self.semantic_seg_img_vis_pub.append(
+                    self.create_publisher(Image, "unitree_go2/front_cam/semantic_segmentation_image_vis", 10)
                 )
                 self.cmd_vel_sub.append(
                     self.create_subscription(Twist, "unitree_go2/cmd_vel", 
                     lambda msg: self.cmd_vel_callback(msg, 0), 10)
+                )
+                self.semantic_seg_img_sub.append(
+                    self.create_subscription(Image, "/unitree_go2/front_cam/semantic_segmentation_image", 
+                    lambda msg: self.semantic_segmentation_callback(msg, 0), 10)
                 )
             else:
                 self.odom_pub.append(
@@ -69,9 +81,16 @@ class RobotDataManager(Node):
                 self.lidar_pub.append(
                     self.create_publisher(PointCloud2, f"unitree_go2_{i}/lidar/point_cloud", 10)
                 )
+                self.semantic_seg_img_vis_pub.append(
+                    self.create_publisher(Image, f"unitree_go2_{i}/front_cam/semantic_segmentation_image_vis", 10)
+                )
                 self.cmd_vel_sub.append(
                     self.create_subscription(Twist, f"unitree_go2_{i}/cmd_vel", 
                     lambda msg, env_idx=i: self.cmd_vel_callback(msg, env_idx), 10)
+                )
+                self.semantic_seg_img_sub.append(
+                    self.create_subscription(Image, f"/unitree_go2_{i}/front_cam/semantic_segmentation_image", 
+                    lambda msg, env_idx=i: self.semantic_segmentation_callback(msg, env_idx), 10)
                 )
         
         # self.create_timer(0.1, self.pub_ros2_data_callback)
@@ -294,6 +313,19 @@ class RobotDataManager(Node):
         go2_ctrl.base_vel_cmd_input[env_idx][0] = msg.linear.x
         go2_ctrl.base_vel_cmd_input[env_idx][1] = msg.linear.y
         go2_ctrl.base_vel_cmd_input[env_idx][2] = msg.angular.z
+    
+    def semantic_segmentation_callback(self, img, env_idx):
+        bridge = CvBridge()
+        semantic_image = bridge.imgmsg_to_cv2(img, desired_encoding='passthrough')
+        semantic_image_normalized = (semantic_image / semantic_image.max() * 255).astype(np.uint8)
+
+        # Apply a predefined colormap
+        color_mapped_image = cv2.applyColorMap(semantic_image_normalized, cv2.COLORMAP_JET)
+        # Convert to ROS Image
+        bridge = CvBridge()
+        image_msg = bridge.cv2_to_imgmsg(color_mapped_image, encoding='rgb8')
+        self.semantic_seg_img_vis_pub[env_idx].publish(image_msg)
+
 
     def pub_image_graph(self):
         for i in range(self.num_envs):
