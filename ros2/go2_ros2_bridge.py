@@ -172,9 +172,10 @@ class RobotDataManager(Node):
             camera_broadcaster.sendTransform(base_cam_transform)
     
     def create_camera_publisher(self):
-        self.pub_image_graph()
-        # self.pub_color_image()
-        # self.pub_depth_image()
+        # self.pub_image_graph()
+        self.pub_color_image()
+        self.pub_depth_image()
+        self.pub_semantic_image()
         # self.pub_cam_depth_cloud()
         self.publish_camera_info()
     
@@ -299,11 +300,13 @@ class RobotDataManager(Node):
             if (self.num_envs == 1):
                 color_topic_name = "unitree_go2/front_cam/color_image"
                 depth_topic_name = "unitree_go2/front_cam/depth_image"
+                # segmentation_topic_name = "unitree_go2/front_cam/segmentation_image"
                 # depth_cloud_topic_name = "unitree_go2/front_cam/depth_cloud"
                 frame_id = "unitree_go2/front_cam"                         
             else:
                 color_topic_name = f"unitree_go2_{i}/front_cam/color_image"
                 depth_topic_name = f"unitree_go2_{i}/front_cam/depth_image"
+                # segmentation_topic_name = f"unitree_go2_{i}/front_cam/segmentation_image"
                 # depth_cloud_topic_name = f"unitree_go2_{i}/front_cam/depth_cloud"
                 frame_id = f"unitree_go2_{i}/front_cam"
             keys = og.Controller.Keys
@@ -318,7 +321,8 @@ class RobotDataManager(Node):
                         ("IsaacCreateRenderProduct", "omni.isaac.core_nodes.IsaacCreateRenderProduct"),
                         ("ROS2CameraHelperColor", "omni.isaac.ros2_bridge.ROS2CameraHelper"),
                         ("ROS2CameraHelperDepth", "omni.isaac.ros2_bridge.ROS2CameraHelper"),
-                        ("ROS2CameraHelperDepthCloud", "omni.isaac.ros2_bridge.ROS2CameraHelper"),
+                        # ("ROS2CameraHelperSegmentation", "omni.isaac.ros2_bridge.ROS2CameraHelper"),
+                        # ("ROS2CameraHelperDepthCloud", "omni.isaac.ros2_bridge.ROS2CameraHelper"),
                     ],
 
                     keys.SET_VALUES: [
@@ -339,6 +343,13 @@ class RobotDataManager(Node):
                         ("ROS2CameraHelperDepth.inputs:frameId", frame_id),
                         ("ROS2CameraHelperDepth.inputs:useSystemTime", False),
 
+                        # semantic camera
+                        # ("ROS2CameraHelperSegmentation.inputs:type", "semantic_segmentation"),
+                        # ("ROS2CameraHelperSegmentation.inputs:enableSemanticLabels", True),
+                        # ("ROS2CameraHelperSegmentation.inputs:topicName", segmentation_topic_name),
+                        # ("ROS2CameraHelperSegmentation.inputs:frameId", frame_id),
+                        # ("ROS2CameraHelperSegmentation.inputs:useSystemTime", False),
+
                         # depth camera cloud
                         # ("ROS2CameraHelperDepthCloud.inputs:type", "depth_pcl"),
                         # ("ROS2CameraHelperDepthCloud.inputs:topicName", depth_cloud_topic_name),
@@ -352,6 +363,8 @@ class RobotDataManager(Node):
                         ("IsaacCreateRenderProduct.outputs:renderProductPath", "ROS2CameraHelperColor.inputs:renderProductPath"),
                         ("IsaacCreateRenderProduct.outputs:execOut", "ROS2CameraHelperDepth.inputs:execIn"),
                         ("IsaacCreateRenderProduct.outputs:renderProductPath", "ROS2CameraHelperDepth.inputs:renderProductPath"),
+                        # ("IsaacCreateRenderProduct.outputs:execOut", "ROS2CameraHelperSegmentation.inputs:execIn"),
+                        # ("IsaacCreateRenderProduct.outputs:renderProductPath", "ROS2CameraHelperSegmentation.inputs:renderProductPath"),
                         # ("IsaacCreateRenderProduct.outputs:execOut", "ROS2CameraHelperDepthCloud.inputs:execIn"),
                         # ("IsaacCreateRenderProduct.outputs:renderProductPath", "ROS2CameraHelperDepthCloud.inputs:renderProductPath"),
                     ],
@@ -421,7 +434,50 @@ class RobotDataManager(Node):
                 rv + "IsaacSimulationGate", render_product
             )
             og.Controller.attribute(gate_path + ".inputs:step").set(step_size)
-            
+
+    def pub_semantic_image(self):
+        for i in range(self.num_envs):
+            # The following code will link the camera's render product and publish the data to the specified topic name.
+            render_product = self.cameras[i]._render_product_path
+            step_size = 1
+            if (self.num_envs == 1):
+                topic_name = "unitree_go2/front_cam/semantic_segmentation_image"
+                label_topic_name = "unitree_go2/front_cam/semantic_segmentation_label"                       
+                frame_id = "unitree_go2/front_cam"          
+            else:
+                topic_name = f"unitree_go2_{i}/front_cam/semantic_segmentation_image"
+                label_topic_name = f"unitree_go2_{i}/front_cam/semantic_segmentation_label"                       
+                frame_id = f"unitree_go2_{i}/front_cam"
+            node_namespace = ""
+            queue_size = 1
+
+            rv = omni.syntheticdata.SyntheticData.convert_sensor_type_to_rendervar(
+                                    sd.SensorType.SemanticSegmentation.name
+                                )
+            writer = rep.writers.get("ROS2PublishSemanticSegmentation")
+            writer.initialize(
+                frameId=frame_id,
+                nodeNamespace=node_namespace,
+                queueSize=queue_size,
+                topicName=topic_name
+            )
+            writer.attach([render_product])
+
+            semantic_writer = rep.writers.get(
+               "SemanticSegmentationSD" + f"ROS2PublishSemanticLabels"
+            )
+            semantic_writer.initialize(
+                nodeNamespace=node_namespace,
+                queueSize=queue_size,
+                topicName=label_topic_name,
+            )
+            semantic_writer.attach([render_product])
+
+            # Set step input of the Isaac Simulation Gate nodes upstream of ROS publishers to control their execution rate
+            gate_path = omni.syntheticdata.SyntheticData._get_node_path(
+                rv + "IsaacSimulationGate", render_product
+            )
+            og.Controller.attribute(gate_path + ".inputs:step").set(step_size)
 
     def pub_cam_depth_cloud(self):
         for i in range(self.num_envs):

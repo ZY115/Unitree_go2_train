@@ -3,7 +3,7 @@ from isaacsim import SimulationApp
 # launch omniverse app
 simulation_app = SimulationApp({"headless": False, "anti_aliasing": 0,
                                 "width": 1280, "height": 720, 
-                                "hide_ui": True})
+                                "hide_ui": False})
 import rclpy
 import torch
 import omni
