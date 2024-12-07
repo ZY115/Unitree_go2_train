@@ -5,3 +5,9 @@ num_envs: 1
 camera_follow: True
 env_name: obstacle-dense
 # env_name: full-warehouse
+
+sim_app:
+  anti_aliasing: 0
+  width: 1280
+  height: 720
+  hide_ui: False
