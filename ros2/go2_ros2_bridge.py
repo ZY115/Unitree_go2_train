@@ -172,9 +172,9 @@ class RobotDataManager(Node):
             camera_broadcaster.sendTransform(base_cam_transform)
     
     def create_camera_publisher(self):
-        # self.pub_image_graph()
-        self.pub_color_image()
-        self.pub_depth_image()
+        self.pub_image_graph()
+        # self.pub_color_image()
+        # self.pub_depth_image()
         # self.pub_cam_depth_cloud()
         self.publish_camera_info()
     
@@ -331,13 +331,13 @@ class RobotDataManager(Node):
                         ("ROS2CameraHelperColor.inputs:type", "rgb"),
                         ("ROS2CameraHelperColor.inputs:topicName", color_topic_name),
                         ("ROS2CameraHelperColor.inputs:frameId", frame_id),
-                        ("ROS2CameraHelperColor.inputs:useSystemTime", True),
+                        ("ROS2CameraHelperColor.inputs:useSystemTime", False),
 
                         # depth camera
                         ("ROS2CameraHelperDepth.inputs:type", "depth"),
                         ("ROS2CameraHelperDepth.inputs:topicName", depth_topic_name),
                         ("ROS2CameraHelperDepth.inputs:frameId", frame_id),
-                        ("ROS2CameraHelperDepth.inputs:useSystemTime", True),
+                        ("ROS2CameraHelperDepth.inputs:useSystemTime", False),
 
                         # depth camera cloud
                         # ("ROS2CameraHelperDepthCloud.inputs:type", "depth_pcl"),
