@@ -4,6 +4,7 @@ import hydra
 import rclpy
 import torch
 import time
+import math
 
 FILE_PATH = os.path.join(os.path.dirname(__file__), "cfg")
 @hydra.main(config_path=FILE_PATH, config_name="sim", version_base=None)
@@ -24,6 +25,8 @@ def run_simulator(cfg):
     # Go2 Environment setup
     go2_env_cfg = Go2RSLEnvCfg()
     go2_env_cfg.scene.num_envs = cfg.num_envs
+    go2_env_cfg.decimation = math.ceil(1./go2_env_cfg.sim.dt/cfg.freq)
+    go2_env_cfg.sim.render_interval = go2_env_cfg.decimation
     go2_ctrl.init_base_vel_cmd(cfg.num_envs)
     # env, policy = go2_ctrl.get_rsl_flat_policy(go2_env_cfg)
     env, policy = go2_ctrl.get_rsl_rough_policy(go2_env_cfg)
@@ -47,7 +50,7 @@ def run_simulator(cfg):
     # Sensor setup
     sm = go2_sensors.SensorManager(cfg.num_envs)
     lidar_annotators = sm.add_rtx_lidar()
-    cameras = sm.add_camera()
+    cameras = sm.add_camera(cfg.freq)
 
     # Keyboard control
     system_input = carb.input.acquire_input_interface()
@@ -56,7 +59,7 @@ def run_simulator(cfg):
     
     # ROS2 Bridge
     rclpy.init()
-    dm = go2_ros2_bridge.RobotDataManager(env, lidar_annotators, cameras)
+    dm = go2_ros2_bridge.RobotDataManager(env, lidar_annotators, cameras, cfg)
 
     # Run simulation
     sim_step_dt = float(go2_env_cfg.sim.dt * go2_env_cfg.decimation)

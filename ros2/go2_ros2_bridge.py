@@ -23,8 +23,9 @@ from omni.isaac.ros2_bridge import read_camera_info
 
 
 class RobotDataManager(Node):
-    def __init__(self, env, lidar_annotators, cameras):
+    def __init__(self, env, lidar_annotators, cameras, cfg):
         super().__init__("robot_data_manager")
+        self.cfg = cfg
         self.create_ros_time_graph()
         sim_time_set = False
         while (rclpy.ok() and sim_time_set==False):
@@ -192,11 +193,15 @@ class RobotDataManager(Node):
     
     def create_camera_publisher(self):
         # self.pub_image_graph()
-        self.pub_color_image()
-        self.pub_depth_image()
-        self.pub_semantic_image()
-        # self.pub_cam_depth_cloud()
-        self.publish_camera_info()
+        if (self.cfg.sensor.enable_camera):
+            if (self.cfg.sensor.color_image):
+                self.pub_color_image()
+            if (self.cfg.sensor.depth_image):
+                self.pub_depth_image()
+            if (self.cfg.sensor.semantic_segmentation):
+                self.pub_semantic_image()
+            # self.pub_cam_depth_cloud()
+            self.publish_camera_info()
     
     def publish_odom(self, base_pos, base_rot, base_lin_vel_b, base_ang_vel_b, env_idx):
         odom_msg = Odometry()
@@ -303,11 +308,11 @@ class RobotDataManager(Node):
                                 i)
                 self.publish_pose(robot_data.root_state_w[i, :3],
                                 robot_data.root_state_w[i, 3:7], i)
-
-        if (pub_lidar):
-            self.lidar_pub_time = time.time()
-            for i in range(self.num_envs):
-                self.publish_lidar_data(self.lidar_annotators[i].get_data()["data"].reshape(-1, 3), i)
+        if (self.cfg.sensor.enable_lidar):
+            if (pub_lidar):
+                self.lidar_pub_time = time.time()
+                for i in range(self.num_envs):
+                    self.publish_lidar_data(self.lidar_annotators[i].get_data()["data"].reshape(-1, 3), i)
 
     def cmd_vel_callback(self, msg, env_idx):
         go2_ctrl.base_vel_cmd_input[env_idx][0] = msg.linear.x

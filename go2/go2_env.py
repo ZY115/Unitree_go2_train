@@ -151,10 +151,10 @@ class Go2RSLEnvCfg(ManagerBasedRLEnvCfg):
         self.viewer.lookat = [0.0, 0.0, 0.0]
 
         # step settings
-        self.decimation = 8  # step: N*0.005
+        self.decimation = 8  # step
 
         # simulation settings
-        self.sim.dt = 0.005  # sim step every 5ms: 200Hz
+        self.sim.dt = 0.005  # sim step every 
         self.sim.render_interval = self.decimation  
         self.sim.disable_contact_processing = True
         self.sim.render.antialiasing_mode = None
