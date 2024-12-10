@@ -24,7 +24,7 @@ class Go2SimCfg(InteractiveSceneCfg):
                           init_state=AssetBaseCfg.InitialStateCfg(
                               pos=(0, 0, 1e-4)
                           ))
-
+    
     # Lights
     light = AssetBaseCfg(
         prim_path="/World/light",

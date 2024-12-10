@@ -21,7 +21,8 @@ def run_simulator(cfg):
     from go2.go2_env import Go2RSLEnvCfg, camera_follow
     import env.sim_env as sim_env
     import go2.go2_sensors as go2_sensors
-    
+
+
     # Go2 Environment setup
     go2_env_cfg = Go2RSLEnvCfg()
     go2_env_cfg.scene.num_envs = cfg.num_envs
