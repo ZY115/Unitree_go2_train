@@ -91,7 +91,7 @@ https://github.com/user-attachments/assets/47ef05c1-5124-4feb-afc8-a3f2c306a212
 
 
 ## Example Usage
-The video shows an example of using this repo with an RL agent to achieve navigation and collision avoidance:
+The video shows an example of using this repo with an [RL agent](https://github.com/Zhefan-Xu/NavRL) to achieve navigation and collision avoidance:
 
 
 https://github.com/user-attachments/assets/ccc986c6-bf94-41fe-a4d5-3417ce8b3384
