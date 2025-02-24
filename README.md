@@ -58,6 +58,7 @@ Here is a categorized list of ROS 2 topics available for the Unitree Go2:
 **Front Camera**  
 - `/unitree_go2/front_cam/color_image`: Publishes RGB color images captured by the front camera.
 - `/unitree_go2/front_cam/depth_image`: Publishes depth images from the front camera.
+- `unitree_go2/front_cam/semantic_segmentation_image`: Publishes semantic segmentation images from the front camera.
 - `/unitree_go2/front_cam/info`: Publishes camera information, including intrinsic parameters.
 
 **LIDAR**  
