@@ -24,7 +24,7 @@ class Go2SimCfg(InteractiveSceneCfg):
                           init_state=AssetBaseCfg.InitialStateCfg(
                               pos=(0, 0, 1e-4)
                           ))
-
+    
     # Lights
     light = AssetBaseCfg(
         prim_path="/World/light",
@@ -151,11 +151,11 @@ class Go2RSLEnvCfg(ManagerBasedRLEnvCfg):
         self.viewer.lookat = [0.0, 0.0, 0.0]
 
         # step settings
-        self.decimation = 4  # 50 hz step: 4*0.005
+        self.decimation = 8  # step
 
         # simulation settings
-        self.sim.dt = 0.005  # sim step every 5ms: 200Hz
-        self.sim.render_interval = 4 # 
+        self.sim.dt = 0.005  # sim step every 
+        self.sim.render_interval = self.decimation  
         self.sim.disable_contact_processing = True
         self.sim.render.antialiasing_mode = None
         # self.sim.physics_material = self.scene.terrain.physics_material

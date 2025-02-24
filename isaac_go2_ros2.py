@@ -1,28 +1,33 @@
 from isaacsim import SimulationApp
-
-# launch omniverse app
-simulation_app = SimulationApp({"headless": False, "anti_aliasing": 0,
-                                "width": 1280, "height": 720, 
-                                "hide_ui": True})
-import rclpy
-import torch
-import omni
-import carb
-import go2.go2_ctrl as go2_ctrl
-import ros2.go2_ros2_bridge as go2_ros2_bridge
-from go2.go2_env import Go2RSLEnvCfg, camera_follow
-import env.sim_env as sim_env
-import go2.go2_sensors as go2_sensors
-import time
 import os
 import hydra
+import rclpy
+import torch
+import time
+import math
 
 FILE_PATH = os.path.join(os.path.dirname(__file__), "cfg")
 @hydra.main(config_path=FILE_PATH, config_name="sim", version_base=None)
 def run_simulator(cfg):
+    # launch omniverse app
+    simulation_app = SimulationApp({"headless": False, "anti_aliasing": cfg.sim_app.anti_aliasing,
+                                    "width": cfg.sim_app.width, "height": cfg.sim_app.height, 
+                                    "hide_ui": cfg.sim_app.hide_ui})
+
+    import omni
+    import carb
+    import go2.go2_ctrl as go2_ctrl
+    import ros2.go2_ros2_bridge as go2_ros2_bridge
+    from go2.go2_env import Go2RSLEnvCfg, camera_follow
+    import env.sim_env as sim_env
+    import go2.go2_sensors as go2_sensors
+
+
     # Go2 Environment setup
     go2_env_cfg = Go2RSLEnvCfg()
     go2_env_cfg.scene.num_envs = cfg.num_envs
+    go2_env_cfg.decimation = math.ceil(1./go2_env_cfg.sim.dt/cfg.freq)
+    go2_env_cfg.sim.render_interval = go2_env_cfg.decimation
     go2_ctrl.init_base_vel_cmd(cfg.num_envs)
     # env, policy = go2_ctrl.get_rsl_flat_policy(go2_env_cfg)
     env, policy = go2_ctrl.get_rsl_rough_policy(go2_env_cfg)
@@ -46,7 +51,7 @@ def run_simulator(cfg):
     # Sensor setup
     sm = go2_sensors.SensorManager(cfg.num_envs)
     lidar_annotators = sm.add_rtx_lidar()
-    cameras = sm.add_camera()
+    cameras = sm.add_camera(cfg.freq)
 
     # Keyboard control
     system_input = carb.input.acquire_input_interface()
@@ -55,7 +60,7 @@ def run_simulator(cfg):
     
     # ROS2 Bridge
     rclpy.init()
-    dm = go2_ros2_bridge.RobotDataManager(env, lidar_annotators, cameras)
+    dm = go2_ros2_bridge.RobotDataManager(env, lidar_annotators, cameras, cfg)
 
     # Run simulation
     sim_step_dt = float(go2_env_cfg.sim.dt * go2_env_cfg.decimation)
@@ -84,11 +89,12 @@ def run_simulator(cfg):
                 time.sleep(sleep_duration)
         actual_loop_time = time.time() - start_time
         rtf = min(1.0, sim_step_dt/elapsed_time)
-        print(f"\rStep time: {actual_loop_time*1000:.2g}ms, Real Time Factor: {rtf:.2g}", end='', flush=True)
+        print(f"\rStep time: {actual_loop_time*1000:.2f}ms, Real Time Factor: {rtf:.2f}", end='', flush=True)
     
     dm.destroy_node()
     rclpy.shutdown()
+    simulation_app.close()
 
 if __name__ == "__main__":
     run_simulator()
-    simulation_app.close()
+    
