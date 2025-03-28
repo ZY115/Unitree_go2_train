@@ -6,12 +6,15 @@
 [![Linux platform](https://img.shields.io/badge/platform-Ubuntu--22.04-green.svg)](https://releases.ubuntu.com/22.04/)
 
 Welcome to the Isaac Sim Unitree Go2 repository! This repository provides a Unitree Go2 quadruped robot simulation, leveraging the Isaac Sim/Isaac Lab framework and integrating seamlessly with a ROS 2 interface. It offers a flexible platform for testing navigation, decision-making, and other autonomous tasks in various scenarios.
+
+
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/8a3fb64a-966c-43f1-9124-f95ba060adff" alt="go2 navigation - gif" style="width: 100%;"></td>
-    <td><img src="https://github.com/user-attachments/assets/e8aab9ea-a7aa-4d31-9c12-65e0b0159ac3" alt="warehouse demo - gif" style="width: 100%;"></td>
+    <td><img src="media/sim-demo1.gif" style="width: 100%;"></td>
+    <td><img src="media/sim-demo2.gif" style="width: 100%;"></td>
   </tr>
 </table>
+
 
 ## Installation Guide
 **Step I:** Please follow the [Isaac Lab official documentation](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/binaries_installation.html) to install the Isaac Sim 4.2.0 and Isaac Lab 1.2.0.
