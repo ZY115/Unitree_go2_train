@@ -50,6 +50,15 @@ unitree_go2_rough_cfg = {
             'critic_hidden_dims': [512, 256, 128], 
             'activation': 'elu'
             }, 
+        #####################
+        #这个是名为ObservationManager的管理器，可以直接调用
+        #按照key的名字字母排序，不用手动管理
+        'observations': {
+            'policy': {
+                'concatenate_terms': True   # 拼接 depth、lidar、base
+                }
+            },
+        #####################
         'algorithm': {
             'class_name': 'PPO', 
             'value_loss_coef': 1.0, 

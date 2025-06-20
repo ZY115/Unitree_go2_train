@@ -77,6 +77,8 @@ def get_rsl_flat_policy(cfg):
     policy = ppo_runner.get_inference_policy(device=agent_cfg["device"])
     return env, policy
 
+
+################################
 def get_rsl_rough_policy(cfg):
     env = gym.make("Isaac-Velocity-Rough-Unitree-Go2-v0", cfg=cfg)
     env = RslRlVecEnvWrapper(env)
@@ -87,6 +89,12 @@ def get_rsl_rough_policy(cfg):
                                     run_dir=agent_cfg["load_run"], 
                                     checkpoint=agent_cfg["load_checkpoint"])
     ppo_runner = OnPolicyRunner(env, agent_cfg, log_dir=None, device=agent_cfg["device"])
-    ppo_runner.load(ckpt_path)
+    if ckpt_path and os.path.exists(ckpt_path):
+        print(f"[INFO] Loading checkpoint: {ckpt_path}")
+        ppo_runner.load(ckpt_path)
+    else:
+        print("[INFO] No checkpoint provided — using randomly-initialized policy.")
+
     policy = ppo_runner.get_inference_policy(device=agent_cfg["device"])
     return env, policy
+############################## 2025 6.19

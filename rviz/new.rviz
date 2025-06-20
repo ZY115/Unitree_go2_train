@@ -1,0 +1,37 @@
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 1
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 160
+      Enabled: true
+      Name: Grid
+    - Class: rviz/PointCloud2
+      Enabled: true
+      Name: LiDAR
+      Topic: /unitree_go2/lidar/point_cloud
+      Queue Size: 10
+      Color Transformer: Intensity
+      Size (m): 0.03
+      Style: Points
+    - Class: rviz/Image
+      Enabled: false
+      Name: Front Camera
+      Image Topic: /unitree_go2/front_cam/color_image
+      Queue Size: 10
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: lidar_link
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+    - Class: rviz/PublishPoint
+  Value: true

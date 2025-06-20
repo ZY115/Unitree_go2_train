@@ -1,0 +1,19 @@
+env_cfg:
+  _target_: go2.go2_env.Go2RSLEnvCfg
+
+agent_cfg:
+  _target_: builtins.dict
+  policy: MlpPolicy
+  learning_rate: 3e-4
+  n_steps: 24
+  batch_size: 64
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.01
+  normalize_input: true
+  normalize_value: true
+  clip_obs: 10.0
+  n_timesteps: 500000
+  seed: 42

@@ -11,6 +11,7 @@ from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.utils.noise import UniformNoiseCfg
 from omni.isaac.core.utils.viewports import set_camera_view
+from go2.go2_sensors import SensorManager
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import go2.go2_ctrl as go2_ctrl
@@ -47,9 +48,13 @@ class Go2SimCfg(InteractiveSceneCfg):
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20)), 
         attach_yaw_only=True,
         pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]), 
-        debug_vis=False,
+        debug_vis=True,
         mesh_prim_paths=["/World/ground"],
     )
+    ##########################
+    # lidar = SensorManager.add_rtx_lidar()
+    # depth = SensorManager.add_camera()
+    ###########################
 
 @configclass
 class ActionsCfg:
@@ -85,6 +90,11 @@ class ObservationsCfg:
         height_scan = ObsTerm(func=mdp.height_scan,
                               params={"sensor_cfg": SceneEntityCfg("height_scanner")},
                               clip=(-1.0, 1.0))
+        
+        # Lidar and Depth
+        # lidar = ObsTerm(func = SensorManager.get_lidar_obs())
+        # depth = ObsTerm(func = SensorManager.get_depth_obs())
+        
 
         def __post_init__(self) -> None:
             self.enable_corruption = False
@@ -100,6 +110,11 @@ class CommandsCfg:
         asset_name="unitree_go2",
         resampling_time_range=(0.0, 0.0),
         debug_vis=True,
+        #####
+        rel_heading_envs=1.0,
+        rel_standing_envs=1.0,
+        heading_control_stiffness=1.0,
+        ######
         ranges=mdp.UniformVelocityCommandCfg.Ranges(
             lin_vel_x=(0.0, 0.0), lin_vel_y=(0.0, 0.0), ang_vel_z=(0.0, 0.0), heading=(0, 0)
         ),
@@ -157,7 +172,7 @@ class Go2RSLEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.dt = 0.005  # sim step every 
         self.sim.render_interval = self.decimation  
         self.sim.disable_contact_processing = True
-        self.sim.render.antialiasing_mode = None
+        # self.sim.render.antialiasing_mode = None
         # self.sim.physics_material = self.scene.terrain.physics_material
 
         # settings for rsl env control
