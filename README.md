@@ -6,7 +6,7 @@ Successfully deployed all environments and reproduced the original repository
 
 Successfully obtained Lidar and depth camera information
 
-Successfully transmitted depth camera information to Ops
+Successfully transmitted depth camera information to obs
 
 ## Issues to be resolved:
 The input dimensions of the model have been changed from 235 → 307 435, and we need a new strategy for training
