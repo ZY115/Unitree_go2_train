@@ -18,12 +18,13 @@ We need to find a method that can combine the basic information from Go2, Lidar 
 ### If using the same environment settings as this repository, provide the following example startup code:
 
 Path settings
-
+```bash
 export PYTHONPATH=$PYTHONPATH:$HOME/Desktop/IsaacLab1.2/IsaacLab-1.2.0/source/extensions/omni.isaac.lab
 
 export PYTHONPATH=$PYTHONPATH:$HOME/Desktop/IsaacLab1.2/IsaacLab-1.2.0/source/extensions/omni.isaac.lab_tasks
 
 export PYTHONPATH=$PYTHONPATH:$HOME/Desktop/IsaacLab1.2/IsaacLab-1.2.0/source/extensions/omni.isaac.lab_assets
+```
 
 Run
 
