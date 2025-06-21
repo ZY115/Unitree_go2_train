@@ -27,7 +27,8 @@ export PYTHONPATH=$PYTHONPATH:$HOME/Desktop/IsaacLab1.2/IsaacLab-1.2.0/source/ex
 ```
 
 Run
-
+```bash
 ./python.sh ~/Desktop/isaac-go2-ros2/isaac_go2_ros2.py
+```
 
 ### Please modify according to your actual path
