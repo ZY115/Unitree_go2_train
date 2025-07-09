@@ -153,7 +153,7 @@ FILE_PATH = os.path.join(os.path.dirname(__file__), "cfg")
 @hydra.main(config_path=FILE_PATH, config_name="sim", version_base=None)
 def run_simulator(cfg):
     # launch omniverse app
-    simulation_app = SimulationApp({"headless": False, "anti_aliasing": cfg.sim_app.anti_aliasing,
+    simulation_app = SimulationApp({"headless": True, "anti_aliasing": cfg.sim_app.anti_aliasing,
                                     "width": cfg.sim_app.width, "height": cfg.sim_app.height, 
                                     "hide_ui": cfg.sim_app.hide_ui})
 
@@ -254,7 +254,7 @@ def run_simulator(cfg):
     dm = None
     # Run simulation
     sim_step_dt = float(go2_env_cfg.sim.dt * go2_env_cfg.decimation)
-    # print("`````````````````", go2_env_cfg.observations.policy)
+    # print("``", go2_env_cfg.observations.policy)
 
 
     obs, _ = env.reset()
@@ -270,6 +270,7 @@ def run_simulator(cfg):
 
             # step the environment
             obs, _, _, _ = env.step(actions)
+            print("lidar", sm.get_lidar_obs())
 
             # # ROS2 data
             dm.pub_ros2_data()
@@ -294,4 +295,3 @@ def run_simulator(cfg):
 
 if __name__ == "__main__":
     run_simulator()
-    

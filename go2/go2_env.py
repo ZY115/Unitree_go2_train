@@ -4,7 +4,7 @@ from omni.isaac.lab.sensors import RayCasterCfg, patterns, ContactSensorCfg
 from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.assets import ArticulationCfg, AssetBaseCfg
 import omni.isaac.lab.sim as sim_utils
-import omni.isaac.lab.envs.mdp as mdp
+# import omni.isaac.lab.envs.mdp as mdp
 from omni.isaac.lab.managers import ObservationGroupCfg as ObsGroup
 from omni.isaac.lab.managers import ObservationTermCfg as ObsTerm
 from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
@@ -15,8 +15,11 @@ from go2.go2_sensors import SensorManager
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import go2.go2_ctrl as go2_ctrl
-
-
+# from omni.isaac.lab.managers import TerminationTermCfg, SceneEntityCfg
+# from omni.isaac.lab.envs.legged.termination_cfg import fallen
+import go2.mdp as mdp
+from go2.mdp import rewards, terminations, curriculums
+from omni.isaac.lab.managers import TerminationTermCfg, RewardTermCfg, CurriculumTermCfg, SceneEntityCfg
 @configclass
 class Go2SimCfg(InteractiveSceneCfg):
     # ground plane
@@ -42,6 +45,12 @@ class Go2SimCfg(InteractiveSceneCfg):
     # Go2 foot contact sensor
     contact_forces = ContactSensorCfg(prim_path="{ENV_REGEX_NS}/Go2/.*_foot", history_length=3, track_air_time=True)
 
+####################################
+    base_contact = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Go2/base",
+        history_length=3
+    )
+####################################
     # Go2 height scanner
     height_scanner = RayCasterCfg(
         prim_path="{ENV_REGEX_NS}/Go2/base",
@@ -94,8 +103,6 @@ class ObservationsCfg:
         # Lidar and Depth
         # lidar = ObsTerm(func = SensorManager.get_lidar_obs())
         # depth = ObsTerm(func = SensorManager.get_depth_obs())
-        
-
         def __post_init__(self) -> None:
             self.enable_corruption = False
             self.concatenate_terms = True
@@ -106,17 +113,31 @@ class ObservationsCfg:
 @configclass
 class CommandsCfg:
     """Command specifications for the MDP."""
+    # base_vel_cmd = mdp.UniformVelocityCommandCfg(
+    #     asset_name="unitree_go2",
+    #     resampling_time_range=(0.0, 0.0),
+    #     debug_vis=True,
+    #     #####
+    #     rel_heading_envs=1.0,
+    #     rel_standing_envs=1.0,
+    #     heading_control_stiffness=1.0,
+    #     ######
+    #     ranges=mdp.UniformVelocityCommandCfg.Ranges(
+    #         lin_vel_x=(0.0, 0.0), lin_vel_y=(0.0, 0.0), ang_vel_z=(0.0, 0.0), heading=(0, 0)
+    #     ),
+    # )
     base_vel_cmd = mdp.UniformVelocityCommandCfg(
         asset_name="unitree_go2",
-        resampling_time_range=(0.0, 0.0),
+        resampling_time_range=(2.0, 4.0),  # 每2-4秒换一个目标速度
         debug_vis=True,
-        #####
         rel_heading_envs=1.0,
-        rel_standing_envs=1.0,
+        rel_standing_envs=0.0,
         heading_control_stiffness=1.0,
-        ######
         ranges=mdp.UniformVelocityCommandCfg.Ranges(
-            lin_vel_x=(0.0, 0.0), lin_vel_y=(0.0, 0.0), ang_vel_z=(0.0, 0.0), heading=(0, 0)
+            lin_vel_x=(0.0, 1.0),      # 前进速度：0~1 m/s
+            lin_vel_y=(-0.3, 0.3),     # 横移速度：-0.3~0.3 m/s
+            ang_vel_z=(-1.0, 1.0),     # 转向速度：-1~1 rad/s
+            heading=(-3.14, 3.14)      # 允许随机朝向
         ),
     )
 
@@ -134,7 +155,19 @@ class RewardsCfg:
 @configclass
 class TerminationsCfg:
     """Termination terms for the MDP."""
-    pass
+    #pass
+    # base_contact = TerminationTermCfg(
+    #     func=terminations.base_contact,
+    #     params={
+    #         "sensor_cfg": SceneEntityCfg(name="base_contact"),
+    #         #"body_names":"base"
+    #         "force_threshold": 0.2
+    #     }
+    # )
+    base_fallen = TerminationTermCfg(
+        func=terminations.base_fallen,
+        params={"asset_cfg": SceneEntityCfg(name="unitree_go2"), "max_pitch": 0.5, "max_roll": 0.5}
+    )
 
 @configclass
 class CurriculumCfg:

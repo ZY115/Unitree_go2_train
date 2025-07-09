@@ -1,6 +1,6 @@
 from isaacsim import SimulationApp
 simulation_app = SimulationApp({
-    "headless": False,
+    "headless": True,
     "renderer": "RayTracedLighting",
     "width": 1280,
     "height": 720,

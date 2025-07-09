@@ -1,6 +1,6 @@
 from isaacsim import SimulationApp
 simulation_app = SimulationApp({
-    "headless": False,
+    "headless": True,
     "renderer": "RayTracedLighting",
     "width": 1280,
     "height": 720,
@@ -75,7 +75,7 @@ def main(cfg):
         except Exception as e:
             print(f"[Camera Init Error] {e}")
 
-    # 初始化 ROS2 连接和数据发布
+
     rclpy.init()
     data_manager = RobotDataManager(env, lidar_annotators, cameras, cfg)
 
@@ -86,7 +86,6 @@ def main(cfg):
     runner = OnPolicyRunner(env, unitree_go2_rough_cfg, log_dir=unitree_go2_rough_cfg["log_dir"],
                             device=unitree_go2_rough_cfg["device"])
 
-    # 主训练循环，每次迭代都发布一次传感器数据
     for i in range(unitree_go2_rough_cfg["max_iterations"]):
         runner.learn(num_learning_iterations=1)
 
